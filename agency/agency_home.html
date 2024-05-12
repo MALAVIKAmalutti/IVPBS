@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Dashboard</title>
+
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-firestore.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: url('../assets/travel.jpg');
+            background-size: cover;
+        }
+
+        .upper-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.8);
+            z-index: 2;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            margin: 0 15px;
+        }
+
+        .nav-links .left-icons {
+            margin-right: auto;
+        }
+
+        .nav-links .right-icons {
+            margin-left: auto;
+        }
+
+        .animated-text {
+            margin-left: 30px;
+            text-align: center;
+            color: #fff;
+            font-size: 24px;
+            margin-top: 50px;
+            white-space: nowrap;
+            overflow: hidden;
+            font-family: cursive;
+            animation: typing 3s steps(42) infinite;
+        }
+
+        .icons-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .icon-button {
+            width: 180px;
+            height: 80px;
+            background-color: #feffff;
+            color: #333;
+            border: 1px solid #bdc3c7;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+
+        .side-panel {
+            width: 250px;
+            background-color: #d6dcff;
+            padding: 20px;
+            color: #010405;
+            position: fixed;
+            top: 70px;
+            left: -330px;
+            /* initially hidden */
+            height: 100%;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            transition: left 0.3s ease;
+            z-index: 1;
+        }
+
+        .drag-icon {
+            cursor: pointer;
+        }
+
+        .profile-photo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: #ecf0f1;
+            margin-bottom: 20px;
+        }
+
+        .profile-name {
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+
+        .side-panel a {
+            text-decoration: none;
+            color: #000000;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .side-panel a .icon {
+            margin-right: 10px;
+        }
+
+        @keyframes typing {
+            from {
+                width: 0;
+            }
+
+            to {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="side-panel" id="sidePanel">
+
+        <div class="profile-photo"></div>
+        <div class="profile-name">Your Name</div>
+        <a href="#"><span class="icon">&#128100;</span>Profile</a>
+        <a href="#" onclick="signOut()"><span class="icon">&#128273;</span>Logout</a>
+        <a href="#"><span class="icon">&#10067;</span>Help</a>
+    </div>
+
+    <div class="upper-bar">
+        <div class="nav-links">
+            <div class="drag-icon">&#9776;</div>
+            <a href="agency_home.html">Home</a>
+            <a href="../features.html">Features</a>
+            <a href="../contact.html">Contact</a>
+            <a href="../review.html">Review</a>
+        </div>
+    </div>
+
+    <div class="animated-text">Window to the real-world applications of academic concepts</div>
+
+
+    <div class="icons-container">
+
+        <button class="icon-button" onclick="window.location.href='agency_details.html'">Add Details</button>
+
+        <button class="icon-button" onclick="window.location.href='addpackage.html'">Add Packages</button>
+        <button class="icon-button"><a href="http://localhost:5000/">View Messages</a></button>
+    </div>
+
+    <script>
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZL5ajdJR_wnjrvWhIzxTfCP56MQXf0KI",
+            authDomain: "ivpbs-f2ca0.firebaseapp.com",
+            databaseURL: "https://ivpbs-f2ca0-default-rtdb.firebaseio.com",
+            projectId: "ivpbs-f2ca0",
+            storageBucket: "ivpbs-f2ca0.appspot.com",
+            messagingSenderId: "1049725030175",
+            appId: "1:1049725030175:web:c9bbf54d8e6003060e6a2a",
+            measurementId: "G-8PXXV5TNTR"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        function signOut() {
+
+            firebase.auth().signOut()
+                .then(() => {
+                    console.log('User signed out successfully');
+                    window.location = '../login/login.html'
+                    // Redirect or perform any other actions after sign out
+                })
+                .catch((error) => {
+                    console.error('Sign out error:', error);
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelector('.drag-icon').addEventListener('click', function () {
+                var sidePanel = document.getElementById('sidePanel');
+                sidePanel.style.left = (parseInt(sidePanel.style.left) == 0 ? -330 : 0) + 'px';
+            });
+        });
+
+    </script>
+
+</body>
+
+</html>

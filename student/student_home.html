@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Dashboard</title>
+
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-firestore.js"></script>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: url('../assets/travel.jpg');
+            background-size: cover;
+        }
+
+        .upper-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.8);
+            z-index: 2;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            margin: 0 15px;
+        }
+
+        .nav-links .left-icons {
+            margin-right: auto;
+        }
+
+        .nav-links .right-icons {
+            margin-left: auto;
+        }
+
+        .animated-text {
+            margin-left: 30px;
+            text-align: center;
+            color: #fff;
+            font-size: 24px;
+            margin-top: 50px;
+            white-space: nowrap;
+            overflow: hidden;
+            font-family: cursive;
+            animation: typing 3s steps(42) infinite;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 5px;
+            margin: 15px auto;
+            background-color: rgba(186, 220, 255, 0.8);
+            border: 1px solid #bdc3c7;
+            border-radius: 8px;
+            width: 700px;
+            z-index: 1;
+        }
+
+        .search-input {
+            flex-grow: 1;
+            margin-right: 20px;
+            padding: 8px;
+            border: none;
+            border-radius: 4px;
+        }
+
+        .search-icon {
+            margin-left: 5px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .icons-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .icon-button {
+            width: 180px;
+            height: 80px;
+            background-color: #feffff;
+            color: #333;
+            border: 1px solid #bdc3c7;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #map {
+            display: block;
+            height: 400px;
+            margin-top: 50px;
+            z-index: 1;
+        }
+
+        .side-panel {
+            width: 250px;
+            background-color: #d6dcff;
+            padding: 20px;
+            color: #010405;
+            position: fixed;
+            top: 70px;
+            left: -330px;
+            /* initially hidden */
+            height: 100%;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            transition: left 0.3s ease;
+            z-index: 2;
+        }
+
+        .drag-icon {
+            cursor: pointer;
+        }
+
+        .profile-photo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: #ecf0f1;
+            margin-bottom: 20px;
+        }
+
+        .profile-name {
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+
+        .side-panel a {
+            text-decoration: none;
+            color: #000000;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .side-panel a .icon {
+            margin-right: 10px;
+        }
+
+        @keyframes typing {
+            from {
+                width: 0;
+            }
+
+            to {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="side-panel" id="sidePanel">
+
+        <div class="profile-photo"></div>
+        <div class="profile-name">Your Name</div>
+        <a href="#"><span class="icon">&#128100;</span>Profile</a>
+        <a href="#" onclick="signOut()"><span class="icon">&#128273;</span>Logout</a>
+        <a href="../help.html"><span class="icon">&#10067;</span>Help</a>
+    </div>
+
+    <div class="upper-bar">
+        <div class="nav-links">
+            <div class="drag-icon">&#9776;</div>
+            <a href="student_home.html">Home</a>
+            <a href="../features.html">Features</a>
+            <a href="../contact.html">Contact</a>
+            <a href="../review.html">Review</a>
+        </div>
+
+    </div>
+
+    <div class="animated-text">Window to the real-world applications of academic concepts</div>
+
+    <div class="search-bar">
+        <input type="text" class="search-input" id="sourceInput" placeholder="Enter your Source...">
+        <input type="text" class="search-input" id="destinationInput" placeholder="Enter your Destination...">
+        <span class="search-icon" id="searchButton">&#128269;</span>
+    </div>
+
+    <div class="icons-container">
+        <button class="icon-button" onclick="window.location.href='trip_planner.html'">Trip Planner</button>
+        <button class="icon-button" onclick="window.location.href='attendance_marker.html'">Attendance Marker</button>
+        <button class="icon-button" onclick="window.location.href='company_search.html'">Company</button>
+        <button class="icon-button" onclick="window.location.href='agency_search.html'">Agency</button>
+    </div>
+
+    <div id="map"></div>
+
+    <script>
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZL5ajdJR_wnjrvWhIzxTfCP56MQXf0KI",
+            authDomain: "ivpbs-f2ca0.firebaseapp.com",
+            databaseURL: "https://ivpbs-f2ca0-default-rtdb.firebaseio.com",
+            projectId: "ivpbs-f2ca0",
+            storageBucket: "ivpbs-f2ca0.appspot.com",
+            messagingSenderId: "1049725030175",
+            appId: "1:1049725030175:web:c9bbf54d8e6003060e6a2a",
+            measurementId: "G-8PXXV5TNTR"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+
+        function getLatLongFromAddress(address) {
+            // Construct the URL for the Nominatim API
+            var url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
+
+            // Make a GET request to the Nominatim API
+            return fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();                })
+                .then(data => {
+                    // Check if any results were returned
+                    if (data && data.length > 0) {
+                        // Extract latitude and longitude from the first result
+                        var lat = data[0].lat;
+                        var lon = data[0].lon;
+                        // console.log(`Latitude: ${lat}, Longitude: ${lon}`);
+                        return { lat: lat, lon: lon };
+                    } else {
+                        console.log('No results found');
+                        return null;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    return null;
+                });
+        }
+
+
+        function signOut() {
+            firebase.auth().signOut()
+                .then(() => {
+                    console.log('User signed out successfully');
+                    window.location = '../login/login.html'
+                    // Redirect or perform any other actions after sign out
+                })
+                .catch((error) => {
+                    console.error('Sign out error:', error);
+                });
+        }
+
+        var map = L.map('map')
+        map.setView([11.805, 76.0], 13);
+
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 14,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        navigator.geolocation.watchPosition(success, error)
+
+        L.Control.geocoder().addTo(map);
+
+        let marker, circle, zoomed;
+
+        function success(pos) {
+            const lat = pos.coords.latitude
+            const lng = pos.coords.longitude
+            const accuracy = pos.coords.accuracy
+
+            if (marker) {
+                map.removeLayer(marker)
+                map.removeLayer(circle)
+            }
+
+            marker = L.marker([lat, lng]).addTo(map)
+            circle = L.circle([lat, lng], { radius: accuracy }).addTo(map)
+
+            if (!zoomed) {
+                zoomed = map.fitBounds(circle.getBounds())
+            }
+
+            map.setView([lat, lng])
+        }
+
+        function error(err) {
+            if (err.code === 1) {
+                alert("Please allow geolocation access")
+            }
+            else {
+                alert("Cannot get current location")
+            }
+        }
+
+        var searchInput = document.getElementById('sourceInput');
+        var searchInput2 = document.getElementById('destinationInput');
+        var searchButton = document.getElementById('searchButton');
+
+        // Add event listener to the search button
+        searchButton.addEventListener('click', function () {
+
+            var searchText = searchInput.value;
+            var searchText2 = searchInput2.value;
+
+            let ori = {}
+            let des = {}
+
+            if (searchText && searchText2) {
+
+                getLatLongFromAddress(searchText)
+                    .then(coords => {
+                        ori = coords
+                    });
+
+
+                getLatLongFromAddress(searchText2)
+                    .then(coords => {
+                        des = coords
+                        console.log(des.lon)
+                        console.log(des.lat)
+                    });
+
+                setTimeout(() => {
+
+                    map.removeLayer(marker)
+                    map.removeLayer(circle)
+
+                }, 5000);
+
+
+                setTimeout(() => {
+
+                    var control = L.Routing.control({
+                        waypoints: [
+                            L.latLng(ori.lat, ori.lon), // Origin
+                            L.latLng(des.lat, des.lon) // Destination
+                        ],
+                        routeWhileDragging: true
+                    }).addTo(map);
+
+                }, 2000);
+                // Trigger the geocoding process using the 'geocode' event
+
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelector('.drag-icon').addEventListener('click', function () {
+                var sidePanel = document.getElementById('sidePanel');
+                sidePanel.style.left = (parseInt(sidePanel.style.left) == 0 ? -330 : 0) + 'px';
+            });
+        });
+    </script>
+
+</html>

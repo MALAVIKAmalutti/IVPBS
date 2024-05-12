@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Create Account</title>
+
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-firestore.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: url('../assets/ui1.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        .upper-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background-color: rgba(94, 7, 234, 0.323);
+        }
+
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #dccfcf;
+            margin: 0 15px;
+        }
+
+        .nav-links .left-icons {
+            margin-right: auto;
+        }
+
+        .nav-links .right-icons {
+            position: absolute;
+            right: 2%;
+        }
+
+        .logo {
+            text-align: center;
+            color: #fff;
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 20px;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .right-icons {
+            display: flex;
+            align-items: center;
+            margin-left: auto;
+        }
+
+        .right-icons a {
+            text-decoration: none;
+            color: #e5e1e1;
+            margin-left: 15px;
+        }
+
+        .animated-text {
+            text-align: right;
+            color: #fff;
+            font-size: 24px;
+            margin-top: 20px;
+            margin-right: 20px;
+            white-space: nowrap;
+            overflow: hidden;
+            font-family: cursive;
+            animation: typing 4s steps(22) infinite;
+        }
+
+        .create-account-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 600px;
+            height: 450px;
+            text-align: center;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -40%);
+        }
+
+        .create-account-container h2 {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: end;
+            margin-right: 100px;
+        }
+
+        .form-group label {
+            margin-left: 40px;
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .form-group input {
+            margin-left: 15px;
+            width: 300px;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        #option {
+            display: flex;
+            align-items: center;
+            justify-content: end;
+            margin-bottom: 20px;
+        }
+
+        .form-group select {
+            margin-left: 30px;
+            width: 300px;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+
+        .form-group button {
+            background-color: rgb(29, 89, 229);
+            color: rgb(252, 251, 251);
+            padding: 10px 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 40px;
+        }
+
+        .form-group button:hover {
+            background-color: rgba(28, 114, 235, 0.658);
+        }
+
+        @keyframes typing {
+            from {
+                width: 0;
+            }
+
+            to {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="upper-bar">
+        <div class="nav-links">
+            <div class="left-icons">
+                <a href="features.html">Features</a>
+            </div>
+            <a href="#" class="logo">IVPBS</a>
+            <div class="right-icons">
+                <a href="contact.html">Contact</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="create-account-container">
+        <h2>Create Account</h2>
+        <div id="createAccountForm">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="form-group">
+                <label for="userType">User Type:</label>
+                <select id="userType" name="userType" value="student" required onchange="showOptions()">
+                    <option value="student">Student</option>
+                    <option value="agency">Agency</option>
+                    <option value="company">Company</option>
+                </select>
+            </div>
+            <div id="studentOptions" class="form-group" style="display: none;">
+
+                <div id="option">
+
+                    <label for="institutionName">Institution Name:</label>
+                    <input type="text" id="institutionName" name="institutionName">
+                </div>
+                <div id="option">
+
+                    <label for="institutionId">Institution ID:</label>
+                    <input type="text" id="institutionId" name="institutionId">
+                </div>
+            </div>
+            <div id="agencyOptions" class="form-group" style="display: none;">
+                <div id="option">
+
+                    <label for="headOffice">Head Office:</label>
+                    <input type="text" id="headOffice" name="headOffice">
+                </div>
+                <div id="option">
+                    <label for="licenseId">License ID:</label>
+                    <input type="text" id="licenseId" name="licenseId">
+                </div>
+
+            </div>
+            <div id="companyOptions" class="form-group" style="display: none;">
+                <div id="option">
+                    <label for="companyName">Company Name:</label>
+                    <input type="text" id="companyName" name="companyName">
+                </div>
+                <div id="option">
+
+                    <label for="companyId">Company ID:</label>
+                    <input type="text" id="companyId" name="companyId">
+                </div>
+            </div>
+            <p id="error-message"></p>
+            <div class="form-group">
+                <button id="submitbutton" onclick="signup()">Submit</button>
+            </div>
+        </div>
+    </div>
+    <div class="animated-text">Window to the real-world applications of academic concepts</div>
+
+    <script>
+
+        showOptions();
+
+        function showOptions() {
+
+            var userType = document.getElementById('userType').value;
+            var studentOptions = document.getElementById('studentOptions');
+            var agencyOptions = document.getElementById('agencyOptions');
+            var companyOptions = document.getElementById('companyOptions');
+
+            studentOptions.style.display = userType === 'student' ? 'block' : 'none';
+            agencyOptions.style.display = userType === 'agency' ? 'block' : 'none';
+            companyOptions.style.display = userType === 'company' ? 'block' : 'none';
+        }
+
+        function signup() {
+
+            const firebaseConfig = {
+                apiKey: "AIzaSyBZL5ajdJR_wnjrvWhIzxTfCP56MQXf0KI",
+                authDomain: "ivpbs-f2ca0.firebaseapp.com",
+                databaseURL: "https://ivpbs-f2ca0-default-rtdb.firebaseio.com",
+                projectId: "ivpbs-f2ca0",
+                storageBucket: "ivpbs-f2ca0.appspot.com",
+                messagingSenderId: "1049725030175",
+                appId: "1:1049725030175:web:c9bbf54d8e6003060e6a2a",
+                measurementId: "G-8PXXV5TNTR"
+            };
+
+            firebase.initializeApp(firebaseConfig);
+            var firestore = firebase.firestore();
+
+            document.getElementById('submitbutton').textContent = 'Loading...'
+
+            //getting values of fields form html
+            var name = document.getElementById("name").value;
+            var email = document.getElementById("email").value;
+            var password = document.getElementById("password").value;
+            var institutionName = document.getElementById("institutionName").value;
+
+            var institutionId = document.getElementById("institutionId").value;
+            var userType = document.getElementById("userType").value;
+
+            var headOffice = document.getElementById("headOffice").value;
+            var licenseId = document.getElementById("licenseId").value;
+
+            var companyName = document.getElementById("companyName").value;
+            var companyId = document.getElementById("companyId").value;
+
+            // formating data to send to databse
+            var data = {
+                name,
+                email,
+                userType,
+            };
+            if (userType == 'student') {
+                data.institutionId = institutionId;
+                data.institutionName = institutionName;
+            } else if (userType == 'company') {
+                data.companyName = companyName;
+                data.companyId = companyId;
+            } else {
+                data.headOffice = headOffice;
+                data.licenseId = licenseId;
+            }
+
+            //creating user in firebase authenticn
+            firebase.auth().createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // after signup if succesful
+                    // soring user data in firesore database
+                    console.log("Signed up:", userCredential.user.uid);
+                    
+                    var collectionRef = firestore.collection("users");//selecting the collection to add data
+                    collectionRef.doc(userCredential.user.uid).set(data)//witing data to collection (data created above)
+                        .then(function (docRef) {
+                            // if adding is successful
+
+                            if (userType == 'student') {
+
+                                window.location = '../student/student_home.html' //goning to login page
+                            }
+                            else if (userType == 'company') {
+
+                                window.location = '../company/company_home.html'
+                            }
+                            else if (userType == 'agency') {
+                                window.location = '../agency/agency_home.html'
+                            }
+                            else {
+                                console.log("error")
+                            }
+                        })
+                        .catch(function (error) {
+                            console.error(error);
+                        });
+                })
+                .catch((error) => {
+                    //after signup if error
+                    console.error(error);
+                    document.getElementById('submitbutton').textContent = 'Submit'
+                })
+        }
+
+    </script>
+</body>
+
+</html>

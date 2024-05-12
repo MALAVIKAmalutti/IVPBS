@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-firestore.js"></script>
+
+    <title>Add Package</title>
+
+    <style>
+        /* CSS styles */
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .package-form {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .package {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            position: relative;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        .edit-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Add Package</h2>
+        <button id="addPackageBtn" onclick="togglePackageForm()">Enter your package</button>
+
+        <div class="package-form" id="packageForm">
+            <h3>Package Details</h3>
+            <form id="packageDetailsForm">
+                <label for="packageName">Package Name:</label>
+                <input type="text" id="packageName" name="packageName" required>
+
+                <label for="destination">Destination:</label>
+                <input type="text" id="destination" name="destination" required>
+
+                <label for="duration">Duration:</label>
+                <select id="duration" name="duration" required>
+                    <option value="1">1 Day</option>
+                    <option value="2">2 Days</option>
+                    <option value="3">3 Days</option>
+                    <option value="4">4 Days</option>
+                    <!-- Add more options as needed -->
+                </select>
+
+                <label for="modeOfTravel">Mode of Travel:</label>
+                <input type="text" id="modeOfTravel" name="modeOfTravel" required>
+
+                <label for="numberOfStudents">Number of Students:</label>
+                <input type="number" id="numberOfStudents" name="numberOfStudents" required>
+
+                <label for="amount">Amount:</label>
+                <input type="text" id="amount" name="amount" required>
+
+                <input type="submit" value="Submit">
+            </form>
+        </div>
+
+        <div id="packageList"></div>
+    </div>
+
+    <script>
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZL5ajdJR_wnjrvWhIzxTfCP56MQXf0KI",
+            authDomain: "ivpbs-f2ca0.firebaseapp.com",
+            databaseURL: "https://ivpbs-f2ca0-default-rtdb.firebaseio.com",
+            projectId: "ivpbs-f2ca0",
+            storageBucket: "ivpbs-f2ca0.appspot.com",
+            messagingSenderId: "1049725030175",
+            appId: "1:1049725030175:web:c9bbf54d8e6003060e6a2a",
+            measurementId: "G-8PXXV5TNTR"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        const firestore = firebase.firestore()
+
+        firebase.auth().onAuthStateChanged(function (user) {
+            if (user) {
+                // User is signed in.
+                currentUID = user.uid
+            }
+        });
+
+
+        // JavaScript function to toggle package form visibility
+        function togglePackageForm() {
+            var packageForm = document.getElementById("packageForm");
+            if (packageForm.style.display === "none") {
+                packageForm.style.display = "block";
+            } else {
+                packageForm.style.display = "none";
+            }
+        }
+
+        // JavaScript function to handle form submission
+        document.getElementById("packageDetailsForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            var packageName = document.getElementById("packageName").value;
+            var destination = document.getElementById("destination").value;
+            var duration = document.getElementById("duration").value;
+            var modeOfTravel = document.getElementById("modeOfTravel").value;
+            var numberOfStudents = document.getElementById("numberOfStudents").value;
+            var amount = document.getElementById("amount").value;
+
+            firestore.collection('users').doc(currentUID).get().then(function (doc) {
+                if (doc.exists) {
+                    // Access the field you're interested in
+                    currentPackages = doc.data().packages;
+                    console.log(doc.data().packages)
+                } else {
+                    console.log("No such document!");
+                }
+            }).then(() => {
+
+                let package = {
+                        name: packageName,
+                        destination: destination,
+                        duration: duration,
+                        mode: modeOfTravel,
+                        number: numberOfStudents,
+                        amount: amount
+                }
+
+                const len = Object.keys(currentPackages).length
+                currentPackages[len+1] = package
+
+                firestore.collection("users").doc(currentUID).update({
+                    packages: currentPackages
+
+                }).then(() => {
+                    // window.location.href = 'student_home.html'
+                })
+            })
+
+
+            // Create package HTML element
+            var packageHTML = '<div class="package">';
+            packageHTML += '<h3>' + packageName + '</h3>';
+            packageHTML += '<p><strong>Destination:</strong> ' + destination + '</p>';
+            packageHTML += '<p><strong>Duration:</strong> ' + duration + ' Days</p>';
+            packageHTML += '<p><strong>Mode of Travel:</strong> ' + modeOfTravel + '</p>';
+            packageHTML += '<p><strong>Number of Students:</strong> ' + numberOfStudents + '</p>';
+            packageHTML += '<p><strong>Amount:</strong> $' + amount + '</p>';
+            packageHTML += '<button class="edit-btn" onclick="editPackage(this)">Edit</button>';
+            packageHTML += '</div>';
+
+            // Append package HTML to package list
+            document.getElementById("packageList").innerHTML += packageHTML;
+
+            // Clear form fields
+            document.getElementById("packageDetailsForm").reset();
+
+            // Hide package form
+            document.getElementById("packageForm").style.display = "none";
+        });
+
+        // JavaScript function to handle package edit
+        function editPackage(editBtn) {
+            var packageDiv = editBtn.parentElement;
+            var packageName = packageDiv.querySelector("h3").innerText;
+            var destination = packageDiv.querySelector("p:nth-of-type(1)").innerText.split(": ")[1];
+            var duration = parseInt(packageDiv.querySelector("p:nth-of-type(2)").innerText.split(": ")[1]);
+            var modeOfTravel = packageDiv.querySelector("p:nth-of-type(3)").innerText.split(": ")[1];
+            var numberOfStudents = parseInt(packageDiv.querySelector("p:nth-of-type(4)").innerText.split(": ")[1]);
+            var amount = packageDiv.querySelector("p:nth-of-type(5)").innerText.split(": ")[1].substr(1);
+
+            // Set form values
+            document.getElementById("packageName").value = packageName;
+            document.getElementById("destination").value = destination;
+            document.getElementById("duration").value = duration;
+            document.getElementById("modeOfTravel").value = modeOfTravel;
+            document.getElementById("numberOfStudents").value = numberOfStudents;
+            document.getElementById("amount").value = amount;
+
+            // Remove the package from the list
+            packageDiv.remove();
+
+            // Show the package form
+            document.getElementById("packageForm").style.display = "block";
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>QR Code Generator</title>
+
+    <!-- Include qrcode-generator library -->
+    <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+    <script src="./node_modules/html5-qrcode/html5-qrcode.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+
+    <style>
+        body {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        .mainContainer {
+            display: none;
+            align-items: center;
+            justify-content: space-around;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgb(47, 47, 90);
+        }
+
+        .petti {
+            background-color: white;
+            cursor: pointer;
+            height: 150px;
+            width: 300px;
+            font-weight: bold;
+            font-size: 20px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .genButton {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            /* Green */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            transition-duration: 0.4s;
+
+        }
+
+
+        .mainContainer2 {
+            display: none;
+            width: 100vw;
+            height: 100vh;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+
+        }
+
+        .mainContainer2 h1 {
+            margin: 50px 0px;
+
+        }
+
+        .mainContainer3 {
+            width: 100vw;
+            height: 70vh;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .mainContainer3 button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            /* Green */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            transition-duration: 0.4s;
+        }
+
+        .mainContainer3 span {
+            margin-top: 50px;
+        }
+
+
+        .active {
+            display: flex;
+        }
+
+        #reader__scan_region img {
+            margin-top: 40px;
+        }
+
+        #reader {
+            margin-top: 50px;
+            width: 600px;
+            height: 300px;
+        }
+
+        #result {
+            text-align: center;
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- selection -->
+    <div class="mainContainer active" id="Intro">
+        <div class="petti" id="Coordinator">Student Coordinator</div>
+        <div class="petti" id="Student">Student</div>
+    </div>
+
+    <!-- Student -->
+    <div class="mainContainer2" id="StudentQR">
+        <h1>QR Code Generator</h1>
+        <button id="genButton" class="genButton" onclick="generateQR()">Generate QR Code</button>
+        <div id="qrcode"></div>
+    </div>
+
+    <!-- Coordinator -->
+    <div class="mainContainer3" id="CoordinatorScan">
+
+        <div id="reader"></div>
+        <div id="result"></div>
+    </div>
+
+
+</body>
+
+<script>
+
+    var currentEmail = ''
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBZL5ajdJR_wnjrvWhIzxTfCP56MQXf0KI",
+        authDomain: "ivpbs-f2ca0.firebaseapp.com",
+        databaseURL: "https://ivpbs-f2ca0-default-rtdb.firebaseio.com",
+        projectId: "ivpbs-f2ca0",
+        storageBucket: "ivpbs-f2ca0.appspot.com",
+        messagingSenderId: "1049725030175",
+        appId: "1:1049725030175:web:c9bbf54d8e6003060e6a2a",
+        measurementId: "G-8PXXV5TNTR"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    firebase.auth().onAuthStateChanged(function (user) {
+        if (user) {
+            // User is signed in.
+            currentEmail = user.email
+        }
+    });
+
+    document.getElementById('Student').addEventListener('click', () => {
+        document.getElementById('Intro').classList.remove('active')
+        document.getElementById('StudentQR').classList.add('active')
+    })
+
+    document.getElementById('Coordinator').addEventListener('click', () => {
+        document.getElementById('Intro').classList.remove('active')
+        document.getElementById('CoordinatorScan').classList.add('active')
+        scanQR()
+    })
+
+    function generateQR() {
+
+        document.getElementById('genButton').style.display = 'none'
+
+        // Generate the QR code using the qrcode-generator library
+        var qrCode = new QRCode(document.getElementById('qrcode'), {
+            text: currentEmail,
+            width: 256,
+            height: 256,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+    }
+
+    function scanQR() {
+        const scanner = new Html5QrcodeScanner('reader', {
+            // Scanner will be initialized in DOM inside element with id of 'reader'
+            qrbox: {
+                width: 250,
+                height: 250,
+            },  // Sets dimensions of scanning box (set relative to reader element width)
+            fps: 20, // Frames per second to attempt a scan
+        });
+
+        scanner.render(success, error);
+        // Starts scanner
+
+        function success(result) {
+
+            document.getElementById('result').innerHTML = `
+        <h2>Success!</h2>
+        <p><a href="${result}">${result}</a></p>
+        `;
+            // Prints result as a link inside result element
+
+            scanner.clear();
+            // Clears scanning instance
+
+            document.getElementById('reader').remove();
+            // Removes reader element from DOM since no longer needed
+
+        }
+
+        function error(err) {
+            console.error(err);
+            // Prints any errors to the console
+        }
+    }
+
+</script>
+
+</html>

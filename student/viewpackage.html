@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Packages</title>
+  <style>
+    /* CSS styles */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    h1 {
+      color: #007bff;
+    }
+
+    .policy {
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    .package {
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      background-color: #f9f9f9;
+    }
+
+    .package h2 {
+      margin-bottom: 10px;
+    }
+
+    .button {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Travel Package</h1>
+    <div class="policy">
+      <h3>Package Policy:</h3>
+      <p>Contact our travel consultants to check availability and receive a detailed itinerary.</p>
+      <p>Confirm your booking by completing the reservation form and paying the deposit.</p>
+      <p>Receive your booking confirmation and travel documents via email.</p>
+    </div>
+    <div class="policy">
+      <h3>Cancellation Policy:</h3>
+      <p>Contact our travel consultants to check availability and receive a detailed itinerary.</p>
+      <p>Confirm your booking by completing the reservation form and paying the deposit.</p>
+      <p>Receive your booking confirmation and travel documents via email.</p>
+    </div>
+    <div id="packages"></div>
+  </div>
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-firestore.js"></script>
+
+  <script>
+    // Initialize Firebase
+    var firebaseConfig = {
+      apiKey: "AIzaSyBZL5ajdJR_wnjrvWhIzxTfCP56MQXf0KI",
+      authDomain: "ivpbs-f2ca0.firebaseapp.com",
+      databaseURL: "https://ivpbs-f2ca0-default-rtdb.firebaseio.com",
+      projectId: "ivpbs-f2ca0",
+      storageBucket: "ivpbs-f2ca0.appspot.com",
+      messagingSenderId: "1049725030175",
+      appId: "1:1049725030175:web:c9bbf54d8e6003060e6a2a",
+      measurementId: "G-8PXXV5TNTR"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+
+    var firestore = firebase.firestore();
+
+    let urlParams = new URLSearchParams(window.location.search)
+    let recievedData = urlParams.get('data')
+
+
+    // Function to fetch packages from Firebase
+    function fetchPackages() {
+      var packagesDiv = document.getElementById('packages');
+
+      firestore.collection("users").doc(recievedData).get().then((doc) => {
+
+        var packages = doc.data().packages
+
+        Object.keys(packages).forEach(element => {
+
+          var eachPackage = packages[element]
+
+          var packageDiv = document.createElement('div');
+          packageDiv.className = 'package';
+          packageDiv.innerHTML = `
+            <h2>${eachPackage.name}</h2>
+            <p><strong>Destination:</strong> ${eachPackage.destination}</p>
+            <p><strong>Duration:</strong> ${eachPackage.duration}</p>
+            <p><strong>Mode of Travel:</strong> ${eachPackage.modeOfTravel}</p>
+            <p><strong>Number of Students:</strong> ${eachPackage.numStudents}</p>
+            <p><strong>Amount:</strong> ${eachPackage.amount}</p>
+            <button class="button" onclick="window.location.href='booking.html'">Book Now</button>
+          `;
+          packagesDiv.appendChild(packageDiv);
+
+        })
+
+      });
+    }
+
+    // Function to book a package
+    function bookPackage(packageId) {
+      // You can implement your booking logic here
+      console.log("Booking package with ID:", packageId);
+      // Example: Redirect to a booking page
+      window.location.href = "book.html";
+    }
+
+    // Fetch packages when the page loadss
+    window.onload = fetchPackages;
+  </script>
+</body>
+
+</html>

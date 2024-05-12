@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Your Feedback</title>
+    <!-- Include Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+    <style>
+        body {
+            background-color: #ecf0f1;
+            color: #333;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        header {
+            background-color: #3498db;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        #rating-container {
+            margin-bottom: 20px;
+        }
+
+        .star-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .star {
+            font-size: 24px;
+            color: #ccc;
+            cursor: pointer;
+        }
+
+        .star:hover, .star.clicked {
+            color: #FFD700;
+        }
+
+        #feedback-message {
+            margin-bottom: 10px;
+            color: black;
+        }
+
+        #feedback-category, #feedback-text {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+
+        #send-button {
+            background-color: #3498db;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Your Feedback</h1>
+    </header>
+
+    <main>
+        <div id="rating-container">
+            <div id="feedback-message">Mark your star rating:</div>
+            <div class="star-container">
+                <div onclick="setRating(1)" class="star">&#9733;</div>
+                <div onclick="setRating(2)" class="star">&#9733;</div>
+                <div onclick="setRating(3)" class="star">&#9733;</div>
+                <div onclick="setRating(4)" class="star">&#9733;</div>
+                <div onclick="setRating(5)" class="star">&#9733;</div>
+            </div>
+            <input type="hidden" id="star-rating" name="star-rating" value="0">
+        </div>
+
+        <label for="feedback-category">Select feedback category:</label>
+        <select id="feedback-category" name="feedback-category">
+            <option value="satisfied">Satisfied</option>
+            <option value="not-satisfied">Not Satisfied</option>
+            <option value="good">Good</option>
+        </select>
+
+        <label for="feedback-text">Type your feedback:</label>
+        <textarea id="feedback-text" name="feedback-text" rows="4" placeholder="Write your feedback here..."></textarea>
+
+        <button id="send-button" onclick="sendFeedback()">Send Feedback</button>
+    </main>
+
+    <script>
+        // Your Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyBZL5ajdJR_wnjrvWhIzxTfCP56MQXf0KI",
+          authDomain: "ivpbs-f2ca0.firebaseapp.com",
+          databaseURL: "https://ivpbs-f2ca0-default-rtdb.firebaseio.com",
+          projectId: "ivpbs-f2ca0",
+          storageBucket: "ivpbs-f2ca0.appspot.com",
+          messagingSenderId: "1049725030175",
+          appId: "1:1049725030175:web:c9bbf54d8e6003060e6a2a",
+          measurementId: "G-8PXXV5TNTR"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        firebase.auth().onAuthStateChanged(function (user) {
+            if (user) {
+                // User is signed in.
+                currentUID = user.uid
+            }
+        });
+
+        let urlParams = new URLSearchParams(window.location.search)
+        let recievedData = urlParams.get('data')
+
+        function setRating(rating) {
+            document.getElementById('star-rating').value = rating;
+            for (let i = 1; i <= 5; i++) {
+                const star = document.querySelector(`#rating-container .star:nth-child(${i})`);
+                star.classList.remove('clicked');
+                if (i <= rating) {
+                    star.classList.add('clicked');
+                }
+            }
+        }
+
+        function sendFeedback() {
+
+            const rating = document.getElementById('star-rating').value;
+            const category = document.getElementById('feedback-category').value;
+            const feedbackText = document.getElementById('feedback-text').value;
+            let userName = ''
+            let currentFeedback = {}
+
+            // Add feedback to Firebase collection  
+            db.collection("users").doc(currentUID).get()
+                .then(function (doc) {
+                    if (doc.exists) {
+                        // Access the field you're interested in
+                        userName = doc.data().name;
+                    } else {
+                        console.log("No such document!");
+                    }
+                })
+                .catch(function (error) {
+                    console.error("Error getting document:", error);
+                });
+                
+                db.collection("users").doc(recievedData).get().then(function (doc) {
+                    if (doc.exists) {
+                        // Access the field you're interested in
+                        currentFeedback = doc.data().feedbacks;
+                } else {
+                    console.log("No such document!");
+                }
+            }).then(() => {
+
+                let feedback = {
+                    user: userName,
+                    feedback: {
+                        rating: parseInt(rating),
+                        category: category,
+                        text: feedbackText
+                    }
+                }
+
+                const len = Object.keys(currentFeedback).length
+                console.log(len);
+                currentFeedback[len] = feedback
+
+                db.collection("users").doc(recievedData).update({
+                    feedbacks: currentFeedback
+
+                }).then(() => {
+                    window.location.href = 'student_home.html'
+                })
+            })
+        }
+    </script>
+</body>
+</html>
